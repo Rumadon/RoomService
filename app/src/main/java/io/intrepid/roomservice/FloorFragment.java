@@ -1,12 +1,7 @@
 package io.intrepid.roomservice;
 
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,6 +16,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.util.Date;
+
 public class FloorFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private FloorAdapter floorAdapter;
@@ -34,41 +31,33 @@ public class FloorFragment extends Fragment implements LoaderManager.LoaderCallb
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         RelativeLayout rl = (RelativeLayout) rootView.findViewById(R.id.room_list);
-        //gridView.setAdapter(floorAdapter);
-        ArrayAdapter<ImageView> ada = new ArrayAdapter<ImageView>(this.getActivity(), R.layout.grid_item);
-
-
-//        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                view.setBackgroundColor(Color.BLUE);
-//            }
-//        });
+        ArrayAdapter<ImageView> ada = new ArrayAdapter<>(this.getActivity(), R.layout.grid_item);
 
         Button refreshButton = (Button) rootView.findViewById(R.id.refresh_button);
-
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateRooms();
             }
         });
-        //ImageView image = (ImageView) rootView.findViewById(R.id.image);
 
-        RoomView test1 = new RoomView(getActivity(), 80, 120, 90, 150);
-
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)rl.getLayoutParams();
-        params.setMargins(50, 0 , 0 ,0);
-        test1.setMinimumWidth(150);
-        test1.setMinimumHeight(150);
-
+        int[] xTest = {40, 160, 160, 40};
+        int[] yTest = {40, 40, 170, 170};
+        RoomView test1 = new RoomView(getActivity(), xTest, yTest);
+        //test1.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rl.getLayoutParams();
+        params.setMargins(50, 0, 0, 0);
         test1.setBackgroundColor(Color.BLUE);
         test1.setVisibility(View.VISIBLE);
 
-        test1.drawLater();
-        rl.addView(test1);
-        //inflater.inflate(test1, container)
+        test1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.setBackgroundColor(Color.RED);
+            }
+        });
 
+        rl.addView(test1);
 
         return rootView;
     }
@@ -99,29 +88,8 @@ public class FloorFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void updateRooms() {
-        new FetchFloorTask(getActivity()).execute(new String[]{"now", "-1"});
+        Date queryTime = new Date();
+        new FetchFloorTask(getActivity()).execute(new String[]{queryTime.toString(), "-1"});
     }
 
-    private static Bitmap drawTrapazoid(Bitmap bitmap, int p1, int p2, int x1, int x2, int y1) {
-        Bitmap bmp;
-
-        bmp = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        BitmapShader shader = new BitmapShader(bitmap, BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-
-        Canvas canvas = new Canvas(bmp);
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setShader(shader);
-
-        Path trapazoid = new Path();
-        trapazoid.moveTo(p1, p2);
-        trapazoid.lineTo(x1, 0);
-        trapazoid.lineTo(x2 - x1, y1);
-        trapazoid.lineTo(-x2, 0);
-        trapazoid.lineTo(x1 - x2, y1);
-
-        trapazoid.close();
-        canvas.drawPath(trapazoid, paint);
-        return bmp;
-    }
 }

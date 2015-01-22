@@ -16,6 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:name=".data.ReservationProvider"
+            android:authorities="io.intrepid.roomservice.app" />
     </application>
 
 </manifest>
