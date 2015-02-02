@@ -31,9 +31,7 @@ public class ReservationDBHelper extends SQLiteOpenHelper {
 
                 // Set up the location column as a foreign key to location table.
                 " FOREIGN KEY (" + ReservationContract.ReservationEntry.COLUMN_ROOM_KEY + ") REFERENCES " +
-                ReservationContract.RoomEntry.TABLE_NAME + " (" + ReservationContract.RoomEntry._ID + "), " +
-
-                " UNIQUE (" + ReservationContract.RoomEntry.COLUMN_NAME + ") ON CONFLICT IGNORE);";
+                ReservationContract.RoomEntry.TABLE_NAME + " (" + ReservationContract.RoomEntry._ID + ");";
 
 
         db.execSQL(SQL_CREATE_ROOM_TABLE);
