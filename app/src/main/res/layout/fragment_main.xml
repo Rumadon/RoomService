@@ -28,15 +28,7 @@
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"
             android:layout_below="@id/header"/>
-        <io.intrepid.roomservice.RoomView
-            android:layout_toRightOf="@id/image"
-            android:id="@+id/grid_item_image1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/primary_text_disabled_material_light"
-            >
 
-        </io.intrepid.roomservice.RoomView>
     <RelativeLayout
         android:layout_below="@id/image"
         android:layout_width="match_parent"

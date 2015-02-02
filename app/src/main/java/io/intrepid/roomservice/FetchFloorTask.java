@@ -1,23 +1,25 @@
 package io.intrepid.roomservice;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.activeandroid.Model;
+import com.activeandroid.query.Select;
+import com.google.gson.Gson;
 
-import java.util.Vector;
+import java.util.List;
 
-import io.intrepid.roomservice.data.ReservationContract;
+import io.intrepid.roomservice.models.Floor;
+import io.intrepid.roomservice.models.Room;
+import io.intrepid.roomservice.models.RoomList;
 
 public class FetchFloorTask extends AsyncTask<String, Void, Void> {
-
+    private OnTaskCompleted listener;
     private final Context mContext;
 
-    public FetchFloorTask(Context context) {
+    public FetchFloorTask(Context context, OnTaskCompleted listener) {
         mContext = context;
+        this.listener = listener;
     }
 
     @Override
@@ -26,62 +28,36 @@ public class FetchFloorTask extends AsyncTask<String, Void, Void> {
             return null;
         }
         String queryTime = params[0]; //for use in DB query later
-        int roomNumber = Integer.parseInt(params[1]); ////for use in DB query later
+        int roomNumber = Integer.parseInt(params[1]); //for use in DB query later
 
-        String roomJsonStr = "{\"list\":[" +
-                "{\"id\":0,\"x\":\"25\",\"y\":\"25\",\"name\":\"North\"}," +
-                "{\"id\":1,\"x\":\"125\",\"y\":\"75\",\"name\":\"South\"}," +
-                "{\"id\":2,\"x\":\"200\",\"y\":\"25\",\"name\":\"East\"}" +
-                "]}";
-        try {
-            getRoomDataFromJson(roomJsonStr, 3);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        String roomJsonStr = "{\"floor\":{\"totalX\": 1922,\"totalY\": 1166," +
+                "\"Rooms\":" +
+                "[{\"id\":1,\"x\":\"172,254,254,172\",\"y\":\"642,642,496,496\",\"name\":\"Kitchen\"}," +
+                "{\"id\":2,\"x\":\"460,632,632,460\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":3,\"x\":\"697,782,782,687\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":4,\"x\":\"1190,1362,1362,1190\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":5,\"x\":\"1362,1447,1447,1362\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":6,\"x\":\"1512,1597,1597,1512\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":7,\"x\":\"1597,1682,1682,1597\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":8,\"x\":\"1747,1919,1919,1747\",\"y\":\"642,642,496,496\",\"name\":\"\"}," +
+                "{\"id\":9,\"x\":\"847,1075,1075,847\",\"y\":\"223,308,0,0\",\"name\":\"\"}]}}";
+
+        Gson gson = new Gson();
+        Floor floor = gson.fromJson(roomJsonStr, Floor.class);
+        RoomList roomList = floor.rooms;
+        for (Room room : roomList.roomList) {
+            room.save();
         }
+
+        List<Model> test = new Select().from(Room.class).execute();
+
         return null;
+
     }
 
-    public void getRoomDataFromJson(String inStr, int totalRoomNum) throws JSONException {
-        final String OWM_LIST = "list";
-        final String OWM_ID = "id";
-        final String OWM_NAME = "name";
-        final String OWM_X_CORD = "x";
-        final String OWM_Y_CORD = "y";
-
-        JSONObject reservationJson = new JSONObject(inStr);
-        JSONArray roomArray = reservationJson.getJSONArray(OWM_LIST);
-
-        Vector<ContentValues> cVVector = new Vector<>(totalRoomNum);
-
-        String name;
-        int id;
-        String xCord;
-        String yCord;
-
-        for (int i = 0; i < roomArray.length(); i++) {
-            JSONObject roomInfo = roomArray.getJSONObject(i);
-
-            id = roomInfo.getInt(OWM_ID);
-            name = roomInfo.getString(OWM_NAME);
-            xCord = roomInfo.getString(OWM_X_CORD);
-            yCord = roomInfo.getString(OWM_Y_CORD);
-
-            ContentValues roomValues = new ContentValues();
-
-            roomValues.put(ReservationContract.RoomEntry._ID, id);
-            roomValues.put(ReservationContract.RoomEntry.COLUMN_NAME, name);
-            roomValues.put(ReservationContract.RoomEntry.COLUMN_X_CORD_LIST, xCord);
-            roomValues.put(ReservationContract.RoomEntry.COLUMN_Y_CORD_LIST, yCord);
-            cVVector.add(roomValues);
-        }
-
-        if (cVVector.size() > 0) {
-            ContentValues[] cvArray = new ContentValues[cVVector.size()];
-            cVVector.toArray(cvArray);
-            mContext.getContentResolver().bulkInsert(ReservationContract.RoomEntry.CONTENT_URI,
-                    cvArray);
-        }
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        listener.onTaskCompleted();
     }
-
-
 }

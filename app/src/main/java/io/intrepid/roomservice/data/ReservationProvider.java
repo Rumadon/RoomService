@@ -28,7 +28,7 @@ public class ReservationProvider extends ContentProvider {
             ReservationContract.ReservationEntry.COLUMN_TIME_END;
 
     private static final UriMatcher uriMatcher = buildUriMatcher();
-    private static ReservationDBHelper openHelper;
+    private static ReservationDBHelper openHelper ;
 
     private static final SQLiteQueryBuilder roomReservationQB;
 
@@ -46,6 +46,7 @@ public class ReservationProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        openHelper = new ReservationDBHelper(this.getContext());
         return false;
     }
 
@@ -62,6 +63,8 @@ public class ReservationProvider extends ContentProvider {
                 null,
                 sortOrder
         );
+
+
     }
 
     private static Cursor getRoomsStatusAtTime(Uri uri, String[] projection, String sortOrder) {
